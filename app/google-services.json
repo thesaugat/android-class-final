@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1009736504532",
+    "firebase_url": "https://android-class-7d175.firebaseio.com",
+    "project_id": "android-class-7d175",
+    "storage_bucket": "android-class-7d175.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009736504532:android:51f8d0452cb1dfd4469741",
+        "android_client_info": {
+          "package_name": "com.thesaugat.androidclass"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1009736504532-3c0b42s2dubs61t3lm4nkhd1cvo4k5d3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6I_66hHgyHddcExnMmwgdGcMFseU7S9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1009736504532-3c0b42s2dubs61t3lm4nkhd1cvo4k5d3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
