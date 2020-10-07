@@ -8,8 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
+import android.media.session.MediaSession;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +44,8 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
     SimpleLocation simpleLocation;
     String t, b;
 
+    MediaSession mediaSession;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,8 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         newsFeedRV.setLayoutManager(new LinearLayoutManager(this));
         NewsFeedAdapter newsFeedAdapter = new NewsFeedAdapter(getFeedDataList(), this);
         newsFeedRV.setAdapter(newsFeedAdapter);
+        mediaSession = new MediaSession(this, "tag");
+
 
 
     }
@@ -87,6 +93,7 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         broadCastIntent.putExtra(Constants.NOTIFY_TEXT, t);
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.boy_placeholder);
+        Bitmap bigPicture = BitmapFactory.decodeResource(getResources(), R.drawable.maxresdefault);
 
 
         PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -95,12 +102,11 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         notification.setContentTitle(t);
         notification.setContentText(b);
         notification.setColor(Color.RED);
-        notification.setLargeIcon(largeIcon);
-        notification.setStyle(
-                new NotificationCompat.BigTextStyle()
-                        .bigText("It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).")
-                        .setBigContentTitle("This is big content title")
-                        .setSummaryText("This is a summary text"));
+        notification.setStyle(new NotificationCompat.BigPictureStyle()
+                .bigPicture(bigPicture)
+                .bigLargeIcon(largeIcon)
+
+        );
         notification.setCategory(NotificationCompat.CATEGORY_MESSAGE);
         notification.setPriority(NotificationCompat.PRIORITY_HIGH);
         notification.setAutoCancel(false);
@@ -122,23 +128,28 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         Intent intent = new Intent(this, NotificationDataActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.boy_placeholder);
+        MediaSessionCompat mediaSession = new MediaSessionCompat(getApplicationContext(), "session tag");
+
+        MediaSessionCompat.Token token = mediaSession.getSessionToken();
+
+
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL)
                 .setSmallIcon(R.drawable.ic_facebook)
                 .setContentTitle(t)
                 .setContentText(b)
-                .setStyle(new NotificationCompat.InboxStyle()
-                        .addLine("This is line 1")
-                        .addLine("This is line 2")
-                        .addLine("This is line 3")
-                        .addLine("This is line 4")
-                        .addLine("This is line 5")
-                        .addLine("This is line 6")
-                        .addLine("This is line 7")
-                        .addLine("This is line 8")
-                        .setBigContentTitle("This is big content title")
-                        .setSummaryText("This is a summary text")
+                .setLargeIcon(largeIcon)
+                .addAction(R.drawable.ic_dislike, "Dislike", null)
+                .addAction(R.drawable.ic_previous, "Previous", null)
+                .addAction(R.drawable.ic_pause, "Pause", null)
+                .addAction(R.drawable.ic_next, "Next", null)
+                .addAction(R.drawable.ic_like, "Like", null)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(1, 2, 3)
+                       .setMediaSession(token)
                 )
+                .setSubText("This is action text")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
