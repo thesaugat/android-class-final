@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.location.Address;
 import android.media.session.MediaSession;
 import android.os.Build;
@@ -24,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +32,7 @@ import com.thesaugat.androidclass.R;
 import com.thesaugat.androidclass.SimpleLocation;
 import com.thesaugat.androidclass.adapters.NewsFeedAdapter;
 import com.thesaugat.androidclass.dataClases.FeedData;
+import com.thesaugat.androidclass.dataClases.MessageData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
     EditText title, body;
     SimpleLocation simpleLocation;
     String t, b;
+    public static List<MessageData> messageDataList = new ArrayList<>();
 
     MediaSession mediaSession;
 
@@ -60,7 +62,8 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         btnTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setNotificationTwo();
+//                setNotificationTwo();
+                setNotificationTwoAlt();
 
             }
         });
@@ -78,41 +81,58 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         mediaSession = new MediaSession(this, "tag");
 
 
-
     }
 
     private void setNotificationOne() {
         t = title.getText().toString();
         b = body.getText().toString();
 
-        Intent intent = new Intent(this, NotificationDataActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//        Intent intent = new Intent(this, NotificationDataActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        Intent broadCastIntent = new Intent(this, NotificationReceiver.class);
-        broadCastIntent.putExtra(Constants.NOTIFY_TEXT, t);
+        // Input field for message
 
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.boy_placeholder);
-        Bitmap bigPicture = BitmapFactory.decodeResource(getResources(), R.drawable.maxresdefault);
+        RemoteInput remoteInput = new RemoteInput.Builder("reply_key")
+                .setLabel("Type Here to reply...")
+                .build();
 
 
-        PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent replyIntent = new Intent(this, MessageReceiver.class);
+        PendingIntent replyPendingIntent = PendingIntent.getBroadcast(this, 101, replyIntent, 0);
+
+        NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(R.drawable.ic_reply_message, "Reply", replyPendingIntent)
+                .addRemoteInput(remoteInput).build();
+
+        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("Ram");
+        messagingStyle.setConversationTitle("BCA 2016 Group");
+        messageDataList.add(new MessageData("Hello!", "Ram"));
+        messageDataList.add(new MessageData("Hi!", "Shyam"));
+        messageDataList.add(new MessageData("K cha!", "Hari"));
+        messageDataList.add(new MessageData("Exam Ayoooo!", "Sunil"));
+        messageDataList.add(new MessageData("Hello!", "Kabita"));
+        messageDataList.add(new MessageData("Hello!", "Suruchi"));
+
+        for (MessageData chatData : messageDataList) {
+            NotificationCompat.MessagingStyle.Message notificationMessage = new NotificationCompat.MessagingStyle.Message(
+                    chatData.getText(),
+                    chatData.getTimeStamp(),
+                    chatData.getSender()
+            );
+            messagingStyle.addMessage((notificationMessage));
+
+        }
+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this, Constants.CHANNEL_ONE);
         notification.setSmallIcon(R.mipmap.ic_launcher);
-        notification.setContentTitle(t);
-        notification.setContentText(b);
-        notification.setColor(Color.RED);
-        notification.setStyle(new NotificationCompat.BigPictureStyle()
-                .bigPicture(bigPicture)
-                .bigLargeIcon(largeIcon)
+        notification.setStyle(messagingStyle);
+        notification.addAction(replyAction);
 
-        );
         notification.setCategory(NotificationCompat.CATEGORY_MESSAGE);
         notification.setPriority(NotificationCompat.PRIORITY_HIGH);
         notification.setAutoCancel(false);
-        notification.setContentIntent(pendingIntent);
-        notification.addAction(R.mipmap.ic_launcher, "Show Toast", actionIntent);
-        notification.addAction(R.mipmap.ic_launcher, "Show Toast", actionIntent);
+
+
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(1, notification.build());
 
@@ -134,7 +154,6 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         MediaSessionCompat.Token token = mediaSession.getSessionToken();
 
 
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL)
                 .setSmallIcon(R.drawable.ic_facebook)
                 .setContentTitle(t)
@@ -147,7 +166,7 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
                 .addAction(R.drawable.ic_like, "Like", null)
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(1, 2, 3)
-                       .setMediaSession(token)
+                        .setMediaSession(token)
                 )
                 .setSubText("This is action text")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -159,6 +178,26 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         notificationManager.notify(1, builder.build());
     }
 
+    private void setNotificationTwoAlt() {
+        t = "My Proposal.docx ";
+        b = "Download is in progress";
+
+        final int progressMax = 100;
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL)
+                .setSmallIcon(R.drawable.ic_facebook)
+                .setContentTitle(t)
+                .setContentText(b)
+                .setProgress(progressMax, 0, false)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
+
+        Log.d("Notification", "Notification ");
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(1, builder.build());
+    }
 
     private List<FeedData> getFeedDataList() {
 
