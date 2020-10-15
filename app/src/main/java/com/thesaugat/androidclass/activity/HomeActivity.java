@@ -10,6 +10,7 @@ import android.location.Address;
 import android.media.session.MediaSession;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.view.View;
@@ -185,18 +186,37 @@ public class HomeActivity extends AppCompatActivity implements SimpleLocation.Li
         final int progressMax = 100;
 
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL)
+        final NotificationCompat.Builder notification = new NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL)
                 .setSmallIcon(R.drawable.ic_facebook)
                 .setContentTitle(t)
                 .setContentText(b)
                 .setProgress(progressMax, 0, false)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
 
 
-        Log.d("Notification", "Notification ");
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(1, builder.build());
+        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SystemClock.sleep(2000);
+                for (int progress = 0; progress <= progressMax; progress += 10) {
+                    notification.setProgress(progressMax, progress, false);
+                    notificationManager.notify(2, notification.build());
+                    SystemClock.sleep(1000);
+
+                }
+                notification.setContentTitle("Download Finished!")
+                        .setOnlyAlertOnce(true)
+                        .setProgress(0, 0, false);
+                notificationManager.notify(2, notification.build());
+
+            }
+        }).start();
     }
 
     private List<FeedData> getFeedDataList() {
